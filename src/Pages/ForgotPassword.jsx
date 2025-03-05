@@ -27,19 +27,10 @@ function ForgotPassword() {
 
       <form onSubmit={handleResetPassword}>
         <label className="block text-sm font-medium">Email Address</label>
-        <input
-          type="email"
-          className="w-full px-3 py-2 border rounded-md mb-3"
-          placeholder="hello@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+        <input type="email"className="w-full px-3 py-2 border rounded-md mb-3"placeholder="hello@example.com"value={email}onChange={(e) => setEmail(e.target.value)}
+         required/>
 
-        <button
-          type="submit"
-          className="w-full bg-pink-500 text-white py-2 rounded-md hover:bg-pink-600 transition"
-        >
+        <button type="submit"className="w-full bg-pink-500 text-white py-2 rounded-md hover:bg-pink-600 transition" >
           Password Reset
         </button>
       </form>
