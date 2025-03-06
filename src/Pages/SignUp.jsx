@@ -1,13 +1,17 @@
-import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
-import { auth ,db,googleProvider} from "../Firebase/FirebaseConfig";
-import { doc, setDoc } from "firebase/firestore";
+import { createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { Link } from 'react-router-dom';
+import { auth, db, googleProvider } from '../Firebase/FirebaseConfig';
+import { doc, setDoc } from 'firebase/firestore';
+import Textarea from '../Components/Textarea';
+import Button from '../Components/Button';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function SignUp() {
-    const [firebaseError, setFirebaseError] = useState("");
-    
+  const [firebaseError, setFirebaseError] = useState('');
+
   const {
     register,
     handleSubmit,
@@ -15,113 +19,102 @@ function SignUp() {
     formState: { errors, isSubmitting },
   } = useForm();
 
-
   const onSubmit = async (data) => {
-    setFirebaseError(""); 
+    setFirebaseError('');
     try {
-      
-    const userCredential = await createUserWithEmailAndPassword(auth,data.email, data.password);
-    const user = userCredential.user;
-    console.log("Signup successful!", user);
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const user = userCredential.user;
+      console.log('Signup successful!', user);
 
-
-      await setDoc(doc(db, "users", user.uid), {
+      await setDoc(doc(db, 'users', user.uid), {
         uid: user.uid,
         name: data.name,
         email: user.email,
         createdAt: new Date(),
       });
-      alert("Signup successful!");
+
+      toast.success('Signup successful! 🎉', { autoClose: 2000 });
       reset();
     } catch (error) {
       setFirebaseError(error.message);
+      toast.error(error.message);
     }
   };
-
 
   const handleGoogleSignIn = async () => {
-    setFirebaseError(""); // Clear previous errors
+    setFirebaseError('');
     try {
       await signInWithPopup(auth, googleProvider);
-      alert("Signup with Google successful!");
-      // navigate("/dashboard"); // Redirect after signup
+      toast.success('Signup with Google successful! 🎉');
     } catch (error) {
       setFirebaseError(error.message);
+      toast.error(error.message);
     }
   };
 
-
-
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
-      <div className="bg-white p-6 rounded-lg shadow-md w-96">
-        <h2 className="text-2xl font-bold text-center mb-4">Create an Account</h2>
-       
-        {firebaseError && <p className="text-red-500 text-center mb-3">{firebaseError}</p>}
-      
+    <div className='flex justify-center items-center h-screen bg-gray-100'>
+      <div className='bg-white p-6 rounded-lg shadow-md w-96'>
+        <h2 className='text-2xl font-bold text-center mb-4'>Create an Account</h2>
+
+        {firebaseError && <p className='text-red-500 text-center mb-3'>{firebaseError}</p>}
+
         <form onSubmit={handleSubmit(onSubmit)}>
-      
-          <label className="block text-gray-700">
-            Name <span className="text-red-500">*</span>
-          </label>
-          <input type="text"placeholder="Enter full name"{...register("name", { required: "Name is required" })}className="w-full px-3 py-2 border rounded-md mb-1 focus:ring-2 focus:ring-pink-500"/>
-          <p className="text-red-500 text-sm mb-3">{errors.name?.message}</p>
-
-          
-          <label className="block text-gray-700">
-            Email <span className="text-red-500">*</span>
-          </label>
-          <input type="email"placeholder="Enter email"{...register("email", {required: "Email is required",pattern: {value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "Invalid email format",},})}
-            className="w-full px-3 py-2 border rounded-md mb-1 focus:ring-2 focus:ring-pink-500"
+          <Textarea
+            label='Name'
+            name='name'
+            placeholder='Enter full name'
+            register={register('name', { required: 'Name is required' })}
+            errors={errors.name?.message}
           />
-          <p className="text-red-500 text-sm mb-3">{errors.email?.message}</p>
-
-          
-          <label className="block text-gray-700">
-            Password <span className="text-red-500">*</span>
-          </label>
-          <input type="password" placeholder="Enter password" {...register("password", {required: "Password is required",minLength: { value: 6, message: "Password must be at least 6 characters" }, })}
-            className="w-full px-3 py-2 border rounded-md mb-1 focus:ring-2 focus:ring-pink-500"
+          <Textarea
+            label='Email'
+            name='email'
+            type='email'
+            placeholder='Enter email'
+            register={register('email', {
+              required: 'Email is required',
+              pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Invalid email format' },
+            })}
+            errors={errors.email?.message}
           />
-          <p className="text-red-500 text-sm mb-3">{errors.password?.message}</p>
+          <Textarea
+            label='Password'
+            name='password'
+            type='password'
+            placeholder='Enter password'
+            register={register('password', {
+              required: 'Password is required',
+              minLength: { value: 6, message: 'Password must be at least 6 characters' },
+            })}
+            errors={errors.password?.message}
+          />
 
-        
-          <div className="flex items-center text-sm text-gray-600 mb-3">
-            <input type="checkbox"{...register("terms", { required: "You must accept the terms" })}className="mr-2"/>
-            By continuing, you agree to our{" "}
-            <span className="text-pink-500 cursor-pointer hover:underline ml-1">
-              terms of service
-            </span>.
-          </div>
-          <p className="text-red-500 text-sm">{errors.terms?.message}</p>
-
-          
-          <button type="submit" disabled={isSubmitting} className="w-full text-white py-2 mt-4 bg-pink-500 hover:bg-pink-600 rounded-md">
-            {isSubmitting ? "Signing Up..." : "Sign Up"}
-          </button>
+          <Button type='submit' variant='primary' disabled={isSubmitting}>
+            {isSubmitting ? 'Signing Up...' : 'Sign Up'}
+          </Button>
         </form>
 
-      
-        <div className="flex items-center my-4">
-          <div className="flex-grow border-t border-gray-300"></div>
-          <span className="px-2 text-gray-500 text-sm">or</span>
-          <div className="flex-grow border-t border-gray-300"></div>
+        <div className='flex items-center my-4'>
+          <div className='flex-grow border-t border-gray-300'></div>
+          <span className='px-2 text-gray-500 text-sm'>or</span>
+          <div className='flex-grow border-t border-gray-300'></div>
         </div>
 
-        
-        <button onClick={handleGoogleSignIn} className="w-full bg-gray-200 text-gray-700 py-2 rounded-md hover:bg-gray-300 flex items-center justify-center">
-          <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5 mr-2" />
+        <Button variant='secondary' onClick={handleGoogleSignIn}>
+          <img src='https://www.svgrepo.com/show/475656/google-color.svg' alt='Google' className='w-5 h-5 mr-2' />
           Continue with Google
-        </button>
+        </Button>
 
-        
-        <p className="text-center text-gray-600 mt-4">
-          Already have an account?{" "}
-          <Link to="/signin" className="text-pink-500 hover:underline">
+        <p className='text-center text-gray-600 mt-4'>
+          Already have an account?{' '}
+          <Link to='/signin' className='text-pink-500 hover:underline'>
             Sign in here
           </Link>
         </p>
       </div>
+
+      <ToastContainer position='top-center' />
     </div>
   );
 }

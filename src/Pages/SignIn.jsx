@@ -1,8 +1,12 @@
 import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { auth, googleProvider } from "../Firebase/FirebaseConfig";
+import Textarea from "../Components/Textarea";
+import Button from "../Components/Button";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function SignIn() {
   const [firebaseError, setFirebaseError] = useState("");
@@ -10,29 +14,25 @@ function SignIn() {
   const {
     register,
     handleSubmit,
-    formState: { errors,isSubmitting },
+    formState: { errors, isSubmitting },
   } = useForm();
 
-  const onSubmit = async(data) => {
-    setFirebaseError(""); 
+  const onSubmit = async (data) => {
+    setFirebaseError("");
     try {
-     
       const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
-      console.log("login successfull:", userCredential);
+      console.log("Login successful:", userCredential);
 
       if (userCredential.user) {
-        alert("Login successful!");
-        // setTimeout(() => {
-        //   navigate("/dashboard");
-        // }, 3000);
+        toast.success("Login successful! ");
       }
     } catch (error) {
       console.log(error);
       setFirebaseError(error.message);
+      toast.error(error.message);
     }
   };
 
- 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
       <div className="bg-white p-6 rounded-lg shadow-md w-96">
@@ -41,38 +41,43 @@ function SignIn() {
         {firebaseError && <p className="text-red-500 text-center mb-3">{firebaseError}</p>}
 
         <form onSubmit={handleSubmit(onSubmit)}>
-         
-          <label className="block text-gray-700">
-            Email <span className="text-red-500">*</span>
-          </label>
-          <input type="email"placeholder="Enter email"{...register("email", {required: "Email is required",pattern: {value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "Invalid email format",},})}
-            className="w-full px-3 py-2 border rounded-md mb-1 focus:ring-2 focus:ring-pink-500"/>
-          <p className="text-red-500 text-sm mb-3">{errors.email?.message}</p>
+          <Textarea
+            label="Email"
+            type="email"
+            name="email"
+            placeholder="Enter email"
+            register={register("email", {
+              required: "Email is required",
+              pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "Invalid email format" },
+            })}
+            errors={errors.email?.message}
+          />
 
-          
-          <label className="block text-gray-700">
-            Password <span className="text-red-500">*</span>
-          </label>
-          <input type="password"placeholder="Enter password"{...register("password", {required: "Password is required",minLength: { value: 6, message: "Password must be at least 6 characters" },})}
-            className="w-full px-3 py-2 border rounded-md mb-1 focus:ring-2 focus:ring-pink-500"/>
-          <p className="text-red-500 text-sm mb-3">{errors.password?.message}</p>
-
-
+          <Textarea
+            label="Password"
+            type="password"
+            name="password"
+            placeholder="Enter password"
+            register={register("password", {
+              required: "Password is required",
+              minLength: { value: 6, message: "Password must be at least 6 characters" },
+            })}
+            errors={errors.password?.message}
+          />
 
           <div className="flex justify-between items-center text-sm mb-3">
             <label className="flex items-center">
-              <input type="checkbox"{...register("keepSignedIn",{value:false})}className="mr-2" />
+              <input type="checkbox" {...register("keepSignedIn", { value: false })} className="mr-2" />
               Keep me signed in
             </label>
             <Link to="/forgot-password" className="text-pink-500 hover:underline">
               Forgot Password?
             </Link>
-            
           </div>
 
-          <button type="submit"disabled={isSubmitting}className={`w-full text-white py-2 mt-4 rounded-md ${isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"}`}>
+          <Button type="submit" variant="primary" disabled={isSubmitting}>
             {isSubmitting ? "Logging In..." : "Login"}
-          </button>
+          </Button>
         </form>
 
         <div className="flex items-center my-4">
@@ -81,10 +86,17 @@ function SignIn() {
           <div className="flex-grow border-t border-gray-300"></div>
         </div>
 
-        <button   className="w-full bg-gray-200 text-gray-700 py-2 rounded-md hover:bg-gray-300 flex items-center justify-center">
+        <Button
+          variant="secondary"
+          onClick={() => {
+            signInWithPopup(auth, googleProvider)
+              .then(() => toast.success("Logged in with Google! 🎉"))
+              .catch((error) => toast.error(error.message));
+          }}
+        >
           <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5 mr-2" />
           Continue with Google
-        </button>
+        </Button>
 
         <p className="text-center text-gray-600 mt-4">
           Don't have an account?{" "}
@@ -93,12 +105,10 @@ function SignIn() {
           </Link>
         </p>
       </div>
+
+      <ToastContainer position="top-center" />
     </div>
-       
-     
   );
 }
 
- 
-
-export default SignIn
+export default SignIn;
