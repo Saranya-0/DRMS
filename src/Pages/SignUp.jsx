@@ -1,8 +1,9 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
-import { auth } from "../Firebase/FirebaseConfig";
+import { auth ,db,googleProvider} from "../Firebase/FirebaseConfig";
+import { doc, setDoc } from "firebase/firestore";
 
 function SignUp() {
     const [firebaseError, setFirebaseError] = useState("");
@@ -18,13 +19,32 @@ function SignUp() {
   const onSubmit = async (data) => {
     setFirebaseError(""); 
     try {
-        
-      await createUserWithEmailAndPassword(auth, data.email, data.password);
-      const user=auth.currentUser;
-      console.log(user);
       
+    const userCredential = await createUserWithEmailAndPassword(auth,data.email, data.password);
+    const user = userCredential.user;
+    console.log("Signup successful!", user);
+
+
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        name: data.name,
+        email: user.email,
+        createdAt: new Date(),
+      });
       alert("Signup successful!");
       reset();
+    } catch (error) {
+      setFirebaseError(error.message);
+    }
+  };
+
+
+  const handleGoogleSignIn = async () => {
+    setFirebaseError(""); // Clear previous errors
+    try {
+      await signInWithPopup(auth, googleProvider);
+      alert("Signup with Google successful!");
+      // navigate("/dashboard"); // Redirect after signup
     } catch (error) {
       setFirebaseError(error.message);
     }
@@ -76,7 +96,8 @@ function SignUp() {
           <p className="text-red-500 text-sm">{errors.terms?.message}</p>
 
           
-          <button type="submit" disabled={isSubmitting} className={`w-full text-white py-2 mt-4 rounded-md ${isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-pink-500 hover:bg-pink-600" }`}> {isSubmitting ? "Signing Up..." : "Sign Up"}
+          <button type="submit" disabled={isSubmitting} className="w-full text-white py-2 mt-4 bg-pink-500 hover:bg-pink-600 rounded-md">
+            {isSubmitting ? "Signing Up..." : "Sign Up"}
           </button>
         </form>
 
@@ -88,7 +109,7 @@ function SignUp() {
         </div>
 
         
-        <button className="w-full bg-gray-200 text-gray-700 py-2 rounded-md hover:bg-gray-300 flex items-center justify-center">
+        <button onClick={handleGoogleSignIn} className="w-full bg-gray-200 text-gray-700 py-2 rounded-md hover:bg-gray-300 flex items-center justify-center">
           <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5 mr-2" />
           Continue with Google
         </button>

@@ -1,21 +1,34 @@
+import { sendPasswordResetEmail } from 'firebase/auth';
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom';
+import { auth } from '../Firebase/FirebaseConfig';
 
 
 function ForgotPassword() {
     const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleResetPassword = (e) => {
+  const handleResetPassword = async(e) => {
     e.preventDefault();
+    if (!email) return setError('Please enter your email');
 
-    if (!email) {
-      setMessage("Email is required!");
-      return;
+    setLoading(true);
+    setMessage('');
+    setError('');
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setMessage('Password reset link sent! Check your email.');
+      setEmail('');
+    } catch (err) {
+      setError('Failed to send reset email. Try again.');
     }
-
-    setMessage("Password reset link sent to your email.");
+    
+    setLoading(false);
   };
+
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
     <div className="bg-white p-6 rounded-lg shadow-md w-96">
@@ -24,15 +37,16 @@ function ForgotPassword() {
       <p className="text-gray-600 text-center mb-4">Enter your email to get a password reset link.</p><br />
 
       {message && <p className="text-center text-green-500 mb-3">{message}</p>}
+      {error && <p className="text-center text-red-500 mb-3">{error}</p>}
 
       <form onSubmit={handleResetPassword}>
         <label className="block text-sm font-medium">Email Address</label>
         <input type="email"className="w-full px-3 py-2 border rounded-md mb-3"placeholder="hello@example.com"value={email}onChange={(e) => setEmail(e.target.value)}
          required/>
 
-        <button type="submit"className="w-full bg-pink-500 text-white py-2 rounded-md hover:bg-pink-600 transition" >
-          Password Reset
-        </button>
+          <button type="submit"disabled={loading}className={`w-full text-white py-2 rounded-md ${loading ? 'bg-gray-400' : 'bg-pink-500 hover:bg-pink-600'}`}>
+            {loading ? 'Sending...' : 'Reset Password'}
+          </button>
       </form>
 
       <p className="text-center mt-4">
