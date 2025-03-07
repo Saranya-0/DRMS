@@ -1,8 +1,8 @@
 import { createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
-import { auth, db, googleProvider } from '../Firebase/FirebaseConfig';
+import { Link, useNavigate } from 'react-router-dom';
+import { auth, db, googleProvider } from '../firebase/FirebaseConfig';
 import { doc, setDoc } from 'firebase/firestore';
 import Textarea from '../Components/Textarea';
 import Button from '../Components/Button';
@@ -11,6 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 function SignUp() {
   const [firebaseError, setFirebaseError] = useState('');
+  const navigate = useNavigate();
 
   const {
     register,
@@ -33,7 +34,10 @@ function SignUp() {
         createdAt: new Date(),
       });
 
-      toast.success('Signup successful! 🎉', { autoClose: 2000 });
+      toast.success('Signup successful! ', { autoClose: 2000 });
+      setTimeout(() => {
+        navigate('/signin');
+      }, 3000);
       reset();
     } catch (error) {
       setFirebaseError(error.message);
@@ -45,7 +49,7 @@ function SignUp() {
     setFirebaseError('');
     try {
       await signInWithPopup(auth, googleProvider);
-      toast.success('Signup with Google successful! 🎉');
+      toast.success('Signup with Google successful! ');
     } catch (error) {
       setFirebaseError(error.message);
       toast.error(error.message);
@@ -101,9 +105,10 @@ function SignUp() {
           <div className='flex-grow border-t border-gray-300'></div>
         </div>
 
-        <Button variant='secondary' onClick={handleGoogleSignIn}>
-          <img src='https://www.svgrepo.com/show/475656/google-color.svg' alt='Google' className='w-5 h-5 mr-2' />
-          Continue with Google
+        <Button variant='secondary' onClick={handleGoogleSignIn} className=''>
+          {' '}
+          <img src='https://www.svgrepo.com/show/475656/google-color.svg' alt='Google' className=' w-8 ' />
+          <span className='text-gray-600 '>Continue with Google</span>
         </Button>
 
         <p className='text-center text-gray-600 mt-4'>

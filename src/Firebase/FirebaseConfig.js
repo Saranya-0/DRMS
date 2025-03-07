@@ -1,24 +1,20 @@
-
 import { initializeApp } from "firebase/app";
-import {getAuth , GoogleAuthProvider}  from "firebase/auth";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
+// Use environment variables instead of hardcoding credentials
 const firebaseConfig = {
-  apiKey: "AIzaSyAy0z9mfEcvrcs7AVEvdXur2HVMQUI-jHM",
-  authDomain: "hrms-47f5e.firebaseapp.com",
-  projectId: "hrms-47f5e",
-  storageBucket: "hrms-47f5e.firebasestorage.app",
-  messagingSenderId: "39413307793",
-  appId: "1:39413307793:web:aba5513f3c03e981036230",
-//   measurementId: "G-0WBC6DJSRJ"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-export const auth=getAuth(app);
- export const googleProvider = new GoogleAuthProvider();
- export const db =getFirestore(app)
-export default app;
-
-// export { auth, googleProvider};
+export const auth = getAuth(app);
+export const googleProvider = new GoogleAuthProvider();
+export const db = getFirestore(app);
+// export default app;

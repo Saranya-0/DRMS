@@ -1,7 +1,7 @@
 import { sendPasswordResetEmail } from 'firebase/auth';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { auth } from '../Firebase/FirebaseConfig';
+import { auth } from '../firebase/FirebaseConfig';
 import Button from '../Components/Button';
 import Textarea from '../Components/Textarea';
 
@@ -46,8 +46,7 @@ function ForgotPassword() {
             name='email'
             placeholder='hello@example.com'
             register={{ value: email, onChange: (e) => setEmail(e.target.value) }}
-            errors={error}
-          />
+            errors={error}/>
 
           <Button type='submit' variant='primary' disabled={loading}>
             {loading ? 'Sending...' : 'Reset Password'}
